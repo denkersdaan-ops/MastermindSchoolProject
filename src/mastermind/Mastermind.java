@@ -60,6 +60,8 @@ public class Mastermind
 		output += colorList[guess[r]];
 	    } // daarna de output
 
+	    output += " : ";
+
 	    for (int r = 0; r < codeLength; r++)
 	    {
 		output += colorList[check[r]];
@@ -117,17 +119,9 @@ public class Mastermind
 	{
 	    int scanGuess = colorToCode();
 
-	    if (scanGuess <= 5 && scanGuess >= 0)
-	    {
-		guess[i] = scanGuess;
+	    guess[i] = scanGuess;
 
-		System.out.println("guess " + (i + 1) + ": " + colorList[guess[i]]);
-	    }
-	    else
-	    {
-		System.out.println("guess /Error!!! \n" + "try again");
-		i--;
-	    }
+	    System.out.println("guess " + (i + 1) + ": " + colorList[guess[i]]);
 	}
     }
 
@@ -182,13 +176,24 @@ public class Mastermind
 	    {
 		check[i] = 6; // = zwart
 	    }
-	    else if (guess[i] == code[0] || guess[i] == code[1] || guess[i] == code[2] || guess[i] == code[3])
-	    {
-		check[i] = 7; // = wit
-	    }
 	    else
 	    {
-		check[i] = 8; // = niets
+		boolean white = false;
+		for (int codeCheck = 0; codeCheck < code.length; codeCheck++)
+		{
+		    if (guess[i] == code[codeCheck])
+		    {
+			white = true;
+		    }
+		}
+		if (white)
+		{
+		    check[i] = 7; // = wit
+		}
+		else
+		{
+		    check[i] = 8; // = niets
+		}
 	    }
 
 	}
