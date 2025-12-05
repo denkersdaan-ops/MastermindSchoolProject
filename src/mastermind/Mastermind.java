@@ -1,5 +1,7 @@
 package mastermind;
 
+// geen .* omdat 3 volgens mij nog te klein is
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -9,102 +11,130 @@ public class Mastermind
 
     static int codeLength = 4;
 
-    static int[] code = new int[codeLength];
+    static int languageIndex = 0;
 
-    static int[] guess = new int[codeLength];
+    static int[] codes = new int[codeLength];
 
-    static int[] check = new int[codeLength];
+    static int[] inputs = new int[codeLength];
 
-    static String[] colorList = new String[10];
+    static String[] checks = new String[codeLength];
 
-    static Scanner codeGuess = new Scanner(System.in);
+    static ArrayList<String> outputHistory = new ArrayList<String>();
 
-    static int isCodeCorrect = 0;
+    static String colors[][] =
+    { // English, Dutch, French
+	    { "green", "groen", "verte" },
+	    { "red", "rood", "rouge" },
+	    { "blue", "blauw", "bleu" },
+	    { "yellow", "geel", "jaune" },
+	    { "orange", "oranje", "orange" },
+	    { "purple", "paars", "violette" } };
+
+    static Scanner keyboard = new Scanner(System.in);
+
+    static boolean won = false;
 
     public static void main(String[] args)
     {
-	setColor();
+	settings();
 
 	codeMaker();
 
 	guessLoop();
 
 	// als je gewonnen hebt dan zie je deze niet
-	if (isCodeCorrect != 0)
+	if (!won)
 	{
 	    System.out.println("you don't have any guesses left");
 	}
-	codeGuess.close();
+	keyboard.close();
+    }
+
+    static void settings()
+    {
+	System.out.println("set your language your options are English, Nederlands and Français");
+
+	String language = keyboard.next();
+
+	// ik wilde elke text per taal veranderen. en dat kan maar dat is te veel werk
+	if (language.equalsIgnoreCase("English"))
+	{
+	    languageIndex = 0;
+	    System.out.println("language set to English");
+	}
+	else if (language.equalsIgnoreCase("Nederlands"))
+	{
+	    languageIndex = 1;
+	    System.out.println("language set to Nederlands");
+	}
+	else if (language.equalsIgnoreCase("Français"))
+	{
+	    languageIndex = 2;
+	    System.out.println("language set to Français");
+	}
+	else
+	{
+	    languageIndex = 0;
+	    System.out.println("language unknown language set to English");
+	}
     }
 
     static void guessLoop()
     {
-	for (int i = 0; i < maxGuesses; i++)
+	for (int guess = 0; guess < maxGuesses; guess++)
 	{
-	    System.out.println("Your options are \n" + colorList[0] + "\n" + colorList[1] + "\n" + colorList[2] + "\n" + colorList[3] + "\n" + colorList[4] + "\n" + colorList[5]);
+	    System.out.println("Your options are");
 
-	    System.out.println("Start guess: " + (i + 1));
+	    for (int i = 0; i < colors.length; i++)
+	    {
+		System.out.println("- " + colors[i][languageIndex]);
+	    }
 
-	    codeGuess = new Scanner(System.in);
+	    System.out.println("Start guess: " + (guess + 1));
+
+	    keyboard = new Scanner(System.in);
 
 	    codeCreaker();
 
 	    codeCheck();
 
 	    String output = "";
-	    isCodeCorrect = 0;
 
 	    // print eerst de intput
-	    for (int r = 0; r < codeLength; r++)
+	    for (int input : inputs)
 	    {
-		output += colorList[guess[r]];
+		output += colors[input][languageIndex];
+		output += " ";
 	    } // daarna de output
 
-	    output += " : ";
+	    output += ": ";
 
-	    for (int r = 0; r < codeLength; r++)
+	    for (String check : checks)
 	    {
-		output += colorList[check[r]];
-
-		// zwart zit onder 6 dus als isCodeCorrect 0 is dan zou je alles zwart
-		// hebben(een goed code)
-		isCodeCorrect += check[r] - 6;
+		output += check;
 	    }
-	    if (isCodeCorrect == 0)
+
+	    System.out.println("\ncheck " + (guess + 1) + ": " + output + "\n");
+
+	    outputHistory.add("\ncheck: " + (guess + 1) + ": " + output + "\n");
+
+	    if (won)
 	    {
-		i = maxGuesses;
+		guess = maxGuesses;
 		for (int r = 6; r > 0; r--)
 		{
 		    System.out.println("you won!!!!");
 		}
 	    }
-	    else
-	    {
-		System.out.println("\ncheck: " + (i + 1) + ": " + output + "\n");
-	    }
 	}
-    }
-
-    static void setColor()
-    {
-	// alle kleuren
-	colorList[0] = " green ";
-	colorList[1] = " red ";
-	colorList[2] = " yellow ";
-	colorList[3] = " purple ";
-	colorList[4] = " orange ";
-	colorList[5] = " blue ";
-	colorList[6] = " black ";
-	colorList[7] = " white ";
-	colorList[8] = " ... ";
     }
 
     static void codeMaker()
     {
 	Random rand = new Random();
-	for (int i = 0; i < code.length; i++)
+	for (int i = 0; i < codes.length; i++)
 	{
-	    code[i] = rand.nextInt(0, 6);
+	    codes[i] = rand.nextInt(6);
 	}
 
 	System.out.println("Code is set! \n code length is: " + codeLength);
@@ -115,87 +145,67 @@ public class Mastermind
 
     static void codeCreaker()
     {
-	for (int i = 0; i < guess.length; i++)
+	for (int i = 0; i < inputs.length; i++)
 	{
-	    int scanGuess = colorToCode();
+	    String input = keyboard.next();
+	    int scanGuess = 0;
+	    if (input.equalsIgnoreCase("history"))
+	    {
+		for (String history : outputHistory)
+		{
+		    System.out.println(history);
+		}
+		i--;
+	    }
+	    else
+	    {
+		scanGuess = colorToCode(input);
 
-	    guess[i] = scanGuess;
+		inputs[i] = scanGuess;
 
-	    System.out.println("guess " + (i + 1) + ": " + colorList[guess[i]]);
+		System.out.println("guess " + (i + 1) + ": " + colors[inputs[i]][0]);
+	    }
 	}
     }
 
-    static int colorToCode()
+    static int colorToCode(String color)
     {
-//	colorList[0] = " green ";
-//	colorList[1] = " red ";
-//	colorList[2] = " yellow ";
-//	colorList[3] = " purple ";
-//	colorList[4] = " orange ";
-//	colorList[5] = " blue ";
-//	colorList[6] = " black ";
-//	colorList[7] = " white ";
-//	colorList[9] = " ... ";
-
-	String colorCode = codeGuess.next();
-
-	if (colorCode.equalsIgnoreCase("green") || colorCode.equalsIgnoreCase("groen"))
+	for (int i = 0; i < colors.length; i++)
 	{
-	    return 0;
-	}
-	if (colorCode.equalsIgnoreCase("red") || colorCode.equalsIgnoreCase("rood"))
-	{
-	    return 1;
-	}
-	if (colorCode.equalsIgnoreCase("yellow") || colorCode.equalsIgnoreCase("geel"))
-	{
-	    return 2;
-	}
-	if (colorCode.equalsIgnoreCase("purple") || colorCode.equalsIgnoreCase("paars"))
-	{
-	    return 3;
-	}
-	if (colorCode.equalsIgnoreCase("orange") || colorCode.equalsIgnoreCase("oranje"))
-	{
-	    return 4;
-	}
-	if (colorCode.equalsIgnoreCase("blue") || colorCode.equalsIgnoreCase("blouw"))
-	{
-	    return 5;
+	    for (String option : colors[i])
+	    {
+		if (color.equalsIgnoreCase(option))
+		    return i;
+	    }
 	}
 
-	System.out.println("Color not recognized \n Try again");
-	return colorToCode();
+	System.out.println("Onbekende kleur, probeer opnieuw: ");
+
+	return colorToCode(keyboard.next());
     }
 
     static void codeCheck()
     {
-	for (int i = 0; i < code.length; i++)
+	won = true;
+	for (int i = 0; i < codeLength; i++)
 	{
-	    if (guess[i] == code[i])
+	    checks[i] = "... ";
+	    if (codes[i] == inputs[i])
 	    {
-		check[i] = 6; // = zwart
+		checks[i] = "black ";
 	    }
 	    else
 	    {
-		boolean white = false;
-		for (int codeCheck = 0; codeCheck < code.length; codeCheck++)
+		won = false;
+
+		for (int checker = 0; checker < codeLength; checker++)
 		{
-		    if (guess[i] == code[codeCheck])
+		    if (inputs[i] == codes[checker])
 		    {
-			white = true;
+			checks[i] = "white ";
 		    }
 		}
-		if (white)
-		{
-		    check[i] = 7; // = wit
-		}
-		else
-		{
-		    check[i] = 8; // = niets
-		}
 	    }
-
 	}
     }
 }
