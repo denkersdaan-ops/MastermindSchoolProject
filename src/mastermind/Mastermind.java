@@ -2,8 +2,6 @@ package mastermind;
 
 public class Mastermind
 {
-    static boolean won = false;
-
     static Funcions function = new Funcions();
 
     public static void main(String[] args)
@@ -20,7 +18,7 @@ public class Mastermind
 	guessLoop();
 
 	// als je gewonnen hebt dan zie je deze niet
-	if (!won)
+	if (!function.codeCheck())
 	{
 	    System.out.println("you don't have any guesses left");
 	}
@@ -47,12 +45,10 @@ public class Mastermind
 		System.out.println(function.getGuessOutput());
 		
 	    }while(!isInputCorrect);
-	    
-	    won = function.codeCheck();
 
 	    System.out.println(function.getOutput(guess));
 
-	    if (won)
+	    if (function.codeCheck())
 	    {
 		for (int i = 100; i > 0; i--)
 		{

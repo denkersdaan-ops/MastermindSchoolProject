@@ -168,6 +168,8 @@ public class Funcions
 	} // daarna de output
 
 	output += ": ";
+	
+	codeCheck();
 
 	for (String check : checks)
 	{
